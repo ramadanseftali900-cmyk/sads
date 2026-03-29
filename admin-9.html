@@ -1403,8 +1403,7 @@ function deleteImage(event, imgId) {
         document.getElementById('topImage' + imgNum).src = '';
     }
     
-    // Firebase'den silme kaldırıldı - sadece localStorage kullanılıyor
-    /*
+    // Firebase'den de sil
     if (typeof database !== 'undefined' && database) {
         database.ref(SITE_ID + '/urunAyarlari/urun9/gorseller/' + imgId).remove()
             .then(function() {
@@ -1414,7 +1413,6 @@ function deleteImage(event, imgId) {
                 console.error('❌ Firebase silme hatası:', error);
             });
     }
-    */
 }
 
 function loadSavedImages() {
