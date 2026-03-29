@@ -1555,15 +1555,28 @@ function gorselleriYukle() {
       var gorseller = snapshot.val() || {};
       for(var i = 1; i <= 15; i++) {
         var img = document.getElementById('topImage' + i);
-        if(img && gorseller['topImg' + i]) {
-          img.src = gorseller['topImg' + i];
-          localStorage.setItem(pageId + '_topImg' + i, gorseller['topImg' + i]);
+        if(img) {
+          if(gorseller['topImg' + i]) {
+            img.src = gorseller['topImg' + i];
+            localStorage.setItem(pageId + '_topImg' + i, gorseller['topImg' + i]);
+          } else {
+            // Firebase'de yoksa sil
+            img.src = '';
+            localStorage.removeItem(pageId + '_topImg' + i);
+            localStorage.removeItem(pageId + '_topImg' + i + '_url');
+          }
         }
       }
       var bottomImg = document.getElementById('bottomImage');
-      if(bottomImg && gorseller['bottomImg1']) {
-        bottomImg.src = gorseller['bottomImg1'];
-        localStorage.setItem(pageId + '_bottomImg1', gorseller['bottomImg1']);
+      if(bottomImg) {
+        if(gorseller['bottomImg1']) {
+          bottomImg.src = gorseller['bottomImg1'];
+          localStorage.setItem(pageId + '_bottomImg1', gorseller['bottomImg1']);
+        } else {
+          bottomImg.src = '';
+          localStorage.removeItem(pageId + '_bottomImg1');
+          localStorage.removeItem(pageId + '_bottomImg1_url');
+        }
       }
       console.log('✅ Görseller Firebase\'den güncellendi');
     });
@@ -1573,15 +1586,27 @@ function gorselleriYukle() {
         var gorseller = snapshot.val() || {};
         for(var i = 1; i <= 15; i++) {
           var img = document.getElementById('topImage' + i);
-          if(img && gorseller['topImg' + i]) {
-            img.src = gorseller['topImg' + i];
-            localStorage.setItem(pageId + '_topImg' + i, gorseller['topImg' + i]);
+          if(img) {
+            if(gorseller['topImg' + i]) {
+              img.src = gorseller['topImg' + i];
+              localStorage.setItem(pageId + '_topImg' + i, gorseller['topImg' + i]);
+            } else {
+              img.src = '';
+              localStorage.removeItem(pageId + '_topImg' + i);
+              localStorage.removeItem(pageId + '_topImg' + i + '_url');
+            }
           }
         }
         var bottomImg = document.getElementById('bottomImage');
-        if(bottomImg && gorseller['bottomImg1']) {
-          bottomImg.src = gorseller['bottomImg1'];
-          localStorage.setItem(pageId + '_bottomImg1', gorseller['bottomImg1']);
+        if(bottomImg) {
+          if(gorseller['bottomImg1']) {
+            bottomImg.src = gorseller['bottomImg1'];
+            localStorage.setItem(pageId + '_bottomImg1', gorseller['bottomImg1']);
+          } else {
+            bottomImg.src = '';
+            localStorage.removeItem(pageId + '_bottomImg1');
+            localStorage.removeItem(pageId + '_bottomImg1_url');
+          }
         }
         console.log('✅ Görseller Firebase\'den güncellendi (gecikme)');
       });
@@ -1643,15 +1668,40 @@ formShowTimeout = setTimeout(function() {
 <script>
 // RENK/BEDEN YÖNETİM SİSTEMİ - MÜŞTERİ SAYFASI
 function loadCustomerRenkBedenSettings() {
-    // Admin panelinden kaydedilmiş ayarları oku
+    // Önce localStorage'dan hızlı yükle
     try {
         var aktifRenkler = JSON.parse(localStorage.getItem(getAdminKey('aktif_renkler')) || '[]');
         var aktifBedenler = JSON.parse(localStorage.getItem(getAdminKey('aktif_bedenler')) || '[]');
-        
-        // Tüm renk/beden dropdown'larını güncelle
         updateCustomerDropdowns(aktifRenkler, aktifBedenler);
     } catch(e) {
         console.log('Renk/Beden ayarları yüklenemedi:', e);
+    }
+    
+    // Firebase'den de güncel verileri çek
+    if (typeof database !== 'undefined' && database) {
+        database.ref(SITE_ID + '/urunAyarlari/urun6/renkBedenDurumlari').once('value', function(snapshot) {
+            var data = snapshot.val();
+            if (data) {
+                for (var key in data) {
+                    localStorage.setItem(getAdminKey(key), data[key]);
+                }
+                // Aktif renkleri ve bedenleri yeniden hesapla
+                var renkler = [];
+                var bedenler = [];
+                for (var k in data) {
+                    if (k.startsWith('renk_') && data[k] === 'eklendi') {
+                        renkler.push(k.replace('renk_', ''));
+                    }
+                    if (k.startsWith('beden_') && data[k] === 'eklendi') {
+                        bedenler.push(k.replace('beden_', ''));
+                    }
+                }
+                localStorage.setItem(getAdminKey('aktif_renkler'), JSON.stringify(renkler));
+                localStorage.setItem(getAdminKey('aktif_bedenler'), JSON.stringify(bedenler));
+                updateCustomerDropdowns(renkler, bedenler);
+                console.log('✅ Renk/Beden Firebase\'den güncellendi - Renkler:', renkler, 'Bedenler:', bedenler);
+            }
+        });
     }
 }
 
@@ -1816,8 +1866,8 @@ function updateCustomerDropdowns(aktifRenkler, aktifBedenler) {
     };
     
     // Renk dropdown'larını güncelle - sadece admin'den eklenen renkler gösterilsin
+    var renkDropdowns = document.querySelectorAll('.renk-dropdown');
     if (aktifRenkler && aktifRenkler.length > 0) {
-        var renkDropdowns = document.querySelectorAll('.renk-dropdown');
         renkDropdowns.forEach(function(select) {
             select.innerHTML = '<option value="">● Renk Seçiniz ▼</option>';
             aktifRenkler.forEach(function(renk) {
@@ -1827,11 +1877,16 @@ function updateCustomerDropdowns(aktifRenkler, aktifBedenler) {
                 select.appendChild(option);
             });
         });
+    } else {
+        // Aktif renk yoksa dropdown'ı temizle
+        renkDropdowns.forEach(function(select) {
+            select.innerHTML = '<option value="">● Renk Seçiniz ▼</option>';
+        });
     }
     
     // Beden dropdown'larını güncelle - sadece admin'den eklenen bedenler gösterilsin
+    var bedenDropdowns = document.querySelectorAll('.beden-dropdown');
     if (aktifBedenler && aktifBedenler.length > 0) {
-        var bedenDropdowns = document.querySelectorAll('.beden-dropdown');
         bedenDropdowns.forEach(function(select) {
             select.innerHTML = '<option value="">Beden Seçiniz ▼</option>';
             aktifBedenler.forEach(function(beden) {
@@ -1840,6 +1895,11 @@ function updateCustomerDropdowns(aktifRenkler, aktifBedenler) {
                 option.textContent = beden;
                 select.appendChild(option);
             });
+        });
+    } else {
+        // Aktif beden yoksa dropdown'ı temizle
+        bedenDropdowns.forEach(function(select) {
+            select.innerHTML = '<option value="">Beden Seçiniz ▼</option>';
         });
     }
     
