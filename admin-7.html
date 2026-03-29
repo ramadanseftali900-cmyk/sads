@@ -1338,8 +1338,7 @@ function loadImage(event, imgId) {
                 console.log('📦 Storage Key: ' + pageId + '_' + imgId + '_url');
                 console.log('🔗 URL: ' + url);
                 
-                // Firebase'e kaydetme kaldırıldı - sadece localStorage kullanılıyor
-                /*
+                // Firebase'e kaydet
                 if (typeof database !== 'undefined' && database) {
                     var gorselData = {};
                     gorselData[imgId] = url;
@@ -1348,21 +1347,17 @@ function loadImage(event, imgId) {
                     }).catch(function(error) {
                         console.error('❌ Firebase kayıt hatası:', error);
                     });
-                } else {
-                    console.warn('⚠️ Firebase henüz hazır değil, sadece localStorage\'a kaydedildi');
-                    if (typeof onFirebaseReady === 'function') {
-                        onFirebaseReady(function(db) {
-                            var gorselData = {};
-                            gorselData[imgId] = url;
-                            db.ref(SITE_ID + '/urunAyarlari/urun7/gorseller').update(gorselData).then(function() {
-                                console.log('✅ Görsel Firebase\'e kaydedildi (gecikme ile): ' + imgId);
-                            }).catch(function(error) {
-                                console.error('❌ Firebase kayıt hatası:', error);
-                            });
+                } else if (typeof onFirebaseReady === 'function') {
+                    var savedImgId = imgId;
+                    var savedUrl = url;
+                    onFirebaseReady(function(db) {
+                        var gorselData = {};
+                        gorselData[savedImgId] = savedUrl;
+                        db.ref(SITE_ID + '/urunAyarlari/urun7/gorseller').update(gorselData).then(function() {
+                            console.log('✅ Görsel Firebase\'e kaydedildi (gecikme): ' + savedImgId);
                         });
-                    }
+                    });
                 }
-                */
             } else {
                 throw new Error('ImgBB yükleme başarısız');
             }
@@ -1598,8 +1593,7 @@ function loadImageFromUrl(imgId) {
         alert('⚠️ UYARI: Depolama alanı dolu!');
     }
     
-    // Firebase'e kaydetme kaldırıldı - sadece localStorage kullanılıyor
-    /*
+    // Firebase'e kaydet
     if (typeof database !== 'undefined' && database) {
         var gorselData = {};
         gorselData[imgId] = url;
@@ -1608,8 +1602,15 @@ function loadImageFromUrl(imgId) {
         }).catch(function(error) {
             console.error('❌ Firebase kayıt hatası:', error);
         });
+    } else if (typeof onFirebaseReady === 'function') {
+        var savedImgId2 = imgId;
+        var savedUrl2 = url;
+        onFirebaseReady(function(db) {
+            var gorselData = {};
+            gorselData[savedImgId2] = savedUrl2;
+            db.ref(SITE_ID + '/urunAyarlari/urun7/gorseller').update(gorselData);
+        });
     }
-    */
 }
 
 // URL temizleme fonksiyonu
