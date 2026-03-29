@@ -74,15 +74,15 @@ input::placeholder{color:#A0AEC3 !important;opacity:1}
 @keyframes formGoster{0%{opacity:0}100%{opacity:1}}
 .formContent{flex:1;padding-top:20px;padding-bottom:0}
 .formLabel{display:block;font-weight:900;margin-bottom:6px;color:#000;font-size:15px;margin-top:5px}
-.formInput{width:100%;margin-left:0;padding:14px;border:2px solid #e2e8f0;border-radius:8px;font-size:16px;background:#fff;margin-bottom:6px;color:#000;font-weight:600;box-sizing:border-box}
+.formInput{width:100%;margin-left:0;padding:14px;border:2px solid #ddd;border-radius:15px;font-size:16px;background:#fff;margin-bottom:6px;color:#000;font-weight:600;box-sizing:border-box}
 .formInput:focus{outline:none;border-color:#000}
 .formInput.error{border-color:#dc3545 !important}
 .formInput::placeholder{color:#A0AEC3;font-weight:600}
-.formTextarea{width:100%;margin-left:0;padding:14px;border:2px solid #e2e8f0;border-radius:8px;font-size:16px;background:#fff;margin-bottom:0;min-height:100px;resize:vertical;color:#000;font-weight:600;box-sizing:border-box}
+.formTextarea{width:100%;margin-left:0;padding:14px;border:2px solid #ddd;border-radius:15px;font-size:16px;background:#fff;margin-bottom:0;min-height:100px;resize:vertical;color:#000;font-weight:600;box-sizing:border-box}
 .formTextarea:focus{outline:none;border-color:#000}
 .formTextarea.error{border-color:#dc3545 !important}
 .formTextarea::placeholder{color:#A0AEC3;font-weight:600}
-.formSelect{width:100%;margin-left:0;padding:14px;border:2px solid #e2e8f0;border-radius:8px;font-size:16px;background:#fff;margin-bottom:6px;cursor:pointer;color:#000;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;font-weight:600;box-sizing:border-box}
+.formSelect{width:100%;margin-left:0;padding:14px;border:2px solid #ddd;border-radius:15px;font-size:16px;background:#fff;margin-bottom:6px;cursor:pointer;color:#000;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;font-weight:600;box-sizing:border-box}
 .formSelect:focus{outline:none;border-color:#000}
 .formSelect.error{border-color:#dc3545 !important}
 .siparisBtn{width:100%;background:#28a745 !important;color:#fff !important;border:none;padding:16px;border-radius:8px;font-size:18px;font-weight:bold;cursor:pointer;margin-bottom:1px;margin-left:0;margin-right:0;margin-top:20px;display:block;box-sizing:border-box}
@@ -271,11 +271,11 @@ setTimeout(function() {
 <div class="formWrapper" style="position:relative;">
 <label class="formLabel" style="margin-top:0">Ödeme Yöntemi:</label>
 <div class="radioBox" style="border:2px solid #000 !important;">
-<div class="radioOption">
+<div class="radioOption" onclick="this.querySelector('input').checked=true;" style="cursor:pointer;">
 <input type="radio" name="odeme" value="nakit" checked>
 <span>Kapıda Nakit Ödeme</span>
 </div>
-<div class="radioOption">
+<div class="radioOption" onclick="this.querySelector('input').checked=true;" style="cursor:pointer;">
 <input type="radio" name="odeme" value="kredi">
 <span>Kapıda Kredi Kartı İle Ödeme</span>
 </div>
@@ -1489,71 +1489,63 @@ function gorselYuklendi() {
   }
 }
 
-// Görselleri localStorage'dan yükle
+// Görselleri yükle - Firebase öncelikli
 function gorselleriYukle() {
-  var pageId = getAdminKey('admin_1_sayfa'); // ÜRÜN-1'İN SAYFA VERİLERİ
+  var pageId = getAdminKey('admin_1_sayfa');
   
-  // Önce localStorage'dan hızlı yükle
+  // Önce localStorage'dan hızlı yükle (anlık görüntü için)
   for(var i = 1; i <= 15; i++) {
     var img = document.getElementById('topImage' + i);
-    
-    // Yeni format (site ID'li)
     var saved = localStorage.getItem(pageId + '_topImg' + i);
-    if (!saved) {
-      saved = localStorage.getItem(pageId + '_topImg' + i + '_url');
-    }
-    
-    // Eski format (site ID'siz)
-    if (!saved) {
-      saved = localStorage.getItem('sayfa1_topImg' + i);
-      if (!saved) {
-        saved = localStorage.getItem('sayfa1_topImg' + i + '_url');
-      }
-    }
-    
-    if(img && saved) {
-      img.src = saved;
-    }
+    if (!saved) saved = localStorage.getItem(pageId + '_topImg' + i + '_url');
+    if (!saved) saved = localStorage.getItem('sayfa1_topImg' + i);
+    if (!saved) saved = localStorage.getItem('sayfa1_topImg' + i + '_url');
+    if(img && saved) img.src = saved;
   }
   
-  // Bottom image
   var bottomImg = document.getElementById('bottomImage');
   var bottomSaved = localStorage.getItem(pageId + '_bottomImg1');
-  if (!bottomSaved) {
-    bottomSaved = localStorage.getItem(pageId + '_bottomImg1_url');
-  }
-  if (!bottomSaved) {
-    bottomSaved = localStorage.getItem('sayfa1_bottomImg1');
-    if (!bottomSaved) {
-      bottomSaved = localStorage.getItem('sayfa1_bottomImg1_url');
-    }
-  }
-  if(bottomImg && bottomSaved) {
-    bottomImg.src = bottomSaved;
-  }
+  if (!bottomSaved) bottomSaved = localStorage.getItem(pageId + '_bottomImg1_url');
+  if (!bottomSaved) bottomSaved = localStorage.getItem('sayfa1_bottomImg1');
+  if (!bottomSaved) bottomSaved = localStorage.getItem('sayfa1_bottomImg1_url');
+  if(bottomImg && bottomSaved) bottomImg.src = bottomSaved;
   
-  // Sonra Firebase'den eksik olanları yükle
+  // Firebase'den güncel görselleri çek ve localStorage'ı güncelle
   if (typeof database !== 'undefined' && database) {
     database.ref(SITE_ID + '/urunAyarlari/urun6/gorseller').once('value', function(snapshot) {
       var gorseller = snapshot.val() || {};
       for(var i = 1; i <= 15; i++) {
         var img = document.getElementById('topImage' + i);
-        var hasLocal = localStorage.getItem(pageId + '_topImg' + i) || 
-                       localStorage.getItem(pageId + '_topImg' + i + '_url') ||
-                       localStorage.getItem('sayfa1_topImg' + i) ||
-                       localStorage.getItem('sayfa1_topImg' + i + '_url');
-        if(img && !hasLocal && gorseller['topImg' + i]) {
+        if(img && gorseller['topImg' + i]) {
           img.src = gorseller['topImg' + i];
+          localStorage.setItem(pageId + '_topImg' + i, gorseller['topImg' + i]);
         }
       }
       var bottomImg = document.getElementById('bottomImage');
-      var hasBottomLocal = localStorage.getItem(pageId + '_bottomImg1') || 
-                           localStorage.getItem(pageId + '_bottomImg1_url') ||
-                           localStorage.getItem('sayfa1_bottomImg1') ||
-                           localStorage.getItem('sayfa1_bottomImg1_url');
-      if(bottomImg && !hasBottomLocal && gorseller['bottomImg1']) {
+      if(bottomImg && gorseller['bottomImg1']) {
         bottomImg.src = gorseller['bottomImg1'];
+        localStorage.setItem(pageId + '_bottomImg1', gorseller['bottomImg1']);
       }
+      console.log('✅ Görseller Firebase\'den güncellendi');
+    });
+  } else if (typeof onFirebaseReady === 'function') {
+    onFirebaseReady(function() {
+      database.ref(SITE_ID + '/urunAyarlari/urun6/gorseller').once('value', function(snapshot) {
+        var gorseller = snapshot.val() || {};
+        for(var i = 1; i <= 15; i++) {
+          var img = document.getElementById('topImage' + i);
+          if(img && gorseller['topImg' + i]) {
+            img.src = gorseller['topImg' + i];
+            localStorage.setItem(pageId + '_topImg' + i, gorseller['topImg' + i]);
+          }
+        }
+        var bottomImg = document.getElementById('bottomImage');
+        if(bottomImg && gorseller['bottomImg1']) {
+          bottomImg.src = gorseller['bottomImg1'];
+          localStorage.setItem(pageId + '_bottomImg1', gorseller['bottomImg1']);
+        }
+        console.log('✅ Görseller Firebase\'den güncellendi (gecikme)');
+      });
     });
   }
 }
